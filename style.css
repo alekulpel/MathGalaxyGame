@@ -1,6 +1,6 @@
 body {
     margin: 0;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: 'Segoe UI', sans-serif;
     background-color: #0b0d17;
     color: #fff;
     display: flex;
@@ -8,113 +8,93 @@ body {
     align-items: center;
     min-height: 100vh;
     overflow: hidden;
+    user-select: none; /* Impede seleção de texto durante o jogo */
 }
 
-/* Fundo Estrelado Simples */
+/* Fundo */
 .star-container {
-    position: absolute;
-    top: 0; left: 0; width: 100%; height: 100%;
-    background-image: radial-gradient(white 1px, transparent 1px), radial-gradient(white 1px, transparent 1px);
-    background-size: 50px 50px;
-    background-position: 0 0, 25px 25px;
-    opacity: 0.2;
-    z-index: -1;
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    background: radial-gradient(circle, #1b2735 0%, #090a0f 100%);
+    z-index: -2;
 }
 
 .game-container {
-    width: 90%;
-    max-width: 600px;
-    text-align: center;
+    width: 95%; max-width: 600px; text-align: center;
+    position: relative;
 }
 
-h1 {
-    color: #00d4ff;
-    text-shadow: 0 0 10px #00d4ff;
-    margin-bottom: 20px;
-}
-
+/* Painéis e Textos */
 .stats-panel {
-    display: flex;
-    justify-content: space-between;
+    display: flex; justify-content: space-between;
     background: rgba(255, 255, 255, 0.1);
-    padding: 10px;
-    border-radius: 10px;
-    margin-bottom: 20px;
-    font-size: 0.9rem;
+    padding: 10px; border-radius: 10px; margin-bottom: 10px;
 }
 
-.highlight { color: #ffd700; font-weight: bold; }
-
-/* Barra de Combustível */
 .fuel-bar-bg {
-    width: 100px;
-    height: 10px;
-    background: #333;
-    border-radius: 5px;
-    margin-top: 5px;
-    overflow: hidden;
+    width: 100px; height: 10px; background: #333;
+    border-radius: 5px; margin-top: 5px; overflow: hidden;
 }
 
 .fuel-bar-fill {
-    height: 100%;
-    width: 10%; /* Inicial */
+    height: 100%; width: 0%;
     background: linear-gradient(90deg, #ff4b1f, #ff9068);
-    transition: width 0.5s ease;
+    transition: width 0.3s ease;
 }
 
-/* Painel da Nave */
+/* TELA MATH */
 .cockpit {
-    background: #16213e;
-    border: 2px solid #00d4ff;
-    border-radius: 15px;
-    padding: 20px;
+    background: #16213e; border: 2px solid #00d4ff;
+    border-radius: 15px; padding: 20px;
     box-shadow: 0 0 20px rgba(0, 212, 255, 0.2);
 }
 
-.equation-box {
-    font-size: 2.5rem;
-    font-weight: bold;
-    margin: 20px 0;
-    letter-spacing: 5px;
-}
-
-.message {
-    color: #aaa;
-    font-style: italic;
-    min-height: 1.2em;
-}
-
+.equation-box { font-size: 2.5rem; font-weight: bold; margin: 20px 0; }
 .controls input {
-    padding: 10px;
-    font-size: 1.2rem;
-    border-radius: 5px;
-    border: none;
-    width: 100px;
-    text-align: center;
+    padding: 10px; font-size: 1.2rem; border-radius: 5px;
+    border: none; width: 80px; text-align: center;
 }
-
 .controls button {
-    padding: 10px 20px;
-    font-size: 1.2rem;
-    background: #00d4ff;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-weight: bold;
-    color: #0b0d17;
-    transition: transform 0.1s;
+    padding: 10px 20px; font-size: 1.1rem; border-radius: 5px;
+    border: none; cursor: pointer; font-weight: bold;
+    transition: 0.2s; margin-left: 5px;
 }
 
-.controls button:active { transform: scale(0.95); }
-
-.planet-display {
-    margin-top: 30px;
-    font-size: 1.1rem;
+#btn-action { background: #00d4ff; color: #000; }
+#btn-explore {
+    display: block; width: 100%; margin-top: 20px;
+    background: linear-gradient(45deg, #ffd700, #ff8c00);
+    color: #000; font-size: 1.2rem;
+    animation: pulse 1s infinite;
 }
 
-#planet-icon { font-size: 4rem; margin-bottom: 10px; animation: float 3s infinite ease-in-out; }
+/* TELA SPACE GAME */
+.hidden { display: none !important; }
 
-@keyframes float {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-10px); }
+#space-screen {
+    position: relative; width: 100%; height: 500px;
+    background: rgba(0, 0, 0, 0.5); border: 2px solid #fff;
+    border-radius: 10px; overflow: hidden; cursor: crosshair;
+}
+
+.hud {
+    position: absolute; top: 10px; right: 10px;
+    font-size: 1.2rem; color: #ffd700; font-weight: bold; z-index: 10;
+}
+
+#player-ship {
+    position: absolute; bottom: 20px; left: 50%;
+    font-size: 40px; transform: translateX(-50%);
+    width: 40px; height: 40px; line-height: 40px;
+    z-index: 5;
+}
+
+.game-object {
+    position: absolute; font-size: 30px;
+    top: -50px; /* Começa fora da tela */
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
 }
