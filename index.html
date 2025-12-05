@@ -11,6 +11,7 @@
     <div class="star-container"></div>
 
     <div class="game-container">
+        
         <header>
             <h1>🚀 Math Galaxy</h1>
             <div class="stats-panel">
@@ -19,18 +20,15 @@
                     <div class="fuel-bar-bg"><div id="fuel-bar" class="fuel-bar-fill"></div></div>
                 </div>
                 <div class="stat-box">
-                    <span>Destino: <span id="planet-name" class="highlight">Terra</span></span>
-                </div>
-                <div class="stat-box">
                     <span>Pontos: <span id="score">0</span></span>
                 </div>
             </div>
         </header>
 
-        <main>
+        <main id="math-screen">
             <div class="cockpit">
                 <div class="screen">
-                    <p class="message" id="message-area">Prepare-se para decolar! Resolva para ganhar combustível.</p>
+                    <p class="message" id="message-area">Resolva para abastecer!</p>
                     <div class="equation-box">
                         <span id="num1">0</span>
                         <span id="operator">x</span>
@@ -41,16 +39,26 @@
                 </div>
                 
                 <div class="controls">
-                    <input type="number" id="user-answer" placeholder="Sua resposta" autocomplete="off">
-                    <button id="btn-fire" onclick="checkAnswer()">Acionar Propulsores 🚀</button>
+                    <input type="number" id="user-answer" placeholder="?" autocomplete="off">
+                    <button id="btn-action" onclick="checkAnswer()">Carregar</button>
                 </div>
-            </div>
 
-            <div class="planet-display">
-                <div id="planet-icon">🌍</div>
-                <p id="distance-info">Distância para o próximo planeta: <span id="km-left">100</span> anos-luz</p>
+                <button id="btn-explore" class="hidden" onclick="startExploration()">
+                    ✨ INICIAR EXPLORAÇÃO (Tanque Cheio!) ✨
+                </button>
             </div>
         </main>
+
+        <main id="space-screen" class="hidden">
+            <div class="hud">
+                <span>Tempo Restante: <span id="timer">40</span>s</span>
+            </div>
+            <div class="game-area" id="game-area">
+                <div id="player-ship">🚀</div>
+                </div>
+            <p class="instruction">Mova o mouse/dedo para guiar a nave!</p>
+        </main>
+
     </div>
 
     <script src="script.js"></script>
