@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Math Galaxy Game</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="star-container"></div>
+
+    <div class="game-container">
+        <header>
+            <h1>🚀 Math Galaxy</h1>
+            <div class="stats-panel">
+                <div class="stat-box">
+                    <span>Combustível</span>
+                    <div class="fuel-bar-bg"><div id="fuel-bar" class="fuel-bar-fill"></div></div>
+                </div>
+                <div class="stat-box">
+                    <span>Destino: <span id="planet-name" class="highlight">Terra</span></span>
+                </div>
+                <div class="stat-box">
+                    <span>Pontos: <span id="score">0</span></span>
+                </div>
+            </div>
+        </header>
+
+        <main>
+            <div class="cockpit">
+                <div class="screen">
+                    <p class="message" id="message-area">Prepare-se para decolar! Resolva para ganhar combustível.</p>
+                    <div class="equation-box">
+                        <span id="num1">0</span>
+                        <span id="operator">x</span>
+                        <span id="num2">0</span>
+                        <span>=</span>
+                        <span class="question-mark">?</span>
+                    </div>
+                </div>
+                
+                <div class="controls">
+                    <input type="number" id="user-answer" placeholder="Sua resposta" autocomplete="off">
+                    <button id="btn-fire" onclick="checkAnswer()">Acionar Propulsores 🚀</button>
+                </div>
+            </div>
+
+            <div class="planet-display">
+                <div id="planet-icon">🌍</div>
+                <p id="distance-info">Distância para o próximo planeta: <span id="km-left">100</span> anos-luz</p>
+            </div>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
