@@ -1,63 +1,58 @@
-// Configurações do Jogo
-const planets = [
-    { name: "Lua", icon: "🌑", distance: 50 },
-    { name: "Marte", icon: "🪐", distance: 100 },
-    { name: "Júpiter", icon: "🌕", distance: 200 },
-    { name: "Saturno", icon: "🪐", distance: 300 },
-    { name: "Netuno", icon: "🌍", distance: 400 },
-    { name: "Galáxia X", icon: "🌌", distance: 500 }
-];
-
-let currentPlanetIndex = 0;
-let fuel = 10; 
+// VARIÁVEIS DE ESTADO
 let score = 0;
-let distanceTraveled = 0;
+let fuel = 0;
 let currentQuestion = {};
 
+// Variáveis do Minigame
+let isPlayingGame = false;
+let gameTimer = 40;
+let gameInterval;
+let spawnInterval;
+let animationFrameId;
+let shipX = 50; // Posição horizontal em % (0 a 100)
+const gameObjects = []; // Lista de asteroides e estrelas
+
+// ELEMENTOS DOM
+const elFuelBar = document.getElementById('fuel-bar');
+const elScore = document.getElementById('score');
+const elMathScreen = document.getElementById('math-screen');
+const elSpaceScreen = document.getElementById('space-screen');
+const elBtnExplore = document.getElementById('btn-explore');
+const elInput = document.getElementById('user-answer');
+const elMessage = document.getElementById('message-area');
 const elNum1 = document.getElementById('num1');
 const elNum2 = document.getElementById('num2');
 const elOperator = document.getElementById('operator');
-const elInput = document.getElementById('user-answer');
-const elMessage = document.getElementById('message-area');
-const elFuelBar = document.getElementById('fuel-bar');
-const elPlanetName = document.getElementById('planet-name');
-const elPlanetIcon = document.getElementById('planet-icon');
-const elScore = document.getElementById('score');
-const elKmLeft = document.getElementById('km-left');
+const elPlayerShip = document.getElementById('player-ship');
+const elGameArea = document.getElementById('game-area');
+const elTimer = document.getElementById('timer');
 
+// INICIALIZAÇÃO
 window.onload = function() {
     loadGame();
     generateQuestion();
     updateUI();
+    
+    // Controle da Nave (Mouse/Touch)
+    elSpaceScreen.addEventListener('mousemove', moveShip);
+    elSpaceScreen.addEventListener('touchmove', moveShipTouch, {passive: false});
 };
 
+// --- LÓGICA DO MATH QUIZ ---
+
 function generateQuestion() {
-    // Decide aleatoriamente se é multiplicação (0) ou divisão (1)
     const type = Math.random() > 0.5 ? 'mult' : 'div';
-    
     let a, b;
 
     if (type === 'mult') {
-        // Multiplicação: Números de 2 a 9 
-        a = Math.floor(Math.random() * 8) + 2; 
-        b = Math.floor(Math.random() * 8) + 2;
-        currentQuestion = {
-            num1: a,
-            num2: b,
-            operator: 'x',
-            answer: a * b
-        };
+        a = Math.floor(Math.random() * 9) + 2; 
+        b = Math.floor(Math.random() * 9) + 2;
+        currentQuestion = { num1: a, num2: b, operator: 'x', answer: a * b };
     } else {
-        let divisor = Math.floor(Math.random() * 8) + 2;
+        let divisor = Math.floor(Math.random() * 9) + 2;
         let result = Math.floor(Math.random() * 9) + 2;
-        let dividend = divisor * result; // Garante que dividend / divisor = inteiro
-
-        currentQuestion = {
-            num1: dividend,
-            num2: divisor,
-            operator: '÷',
-            answer: result
-        };
+        let dividend = divisor * result;
+        currentQuestion = { num1: dividend, num2: divisor, operator: '÷', answer: result };
     }
 
     elNum1.innerText = currentQuestion.num1;
@@ -69,87 +64,188 @@ function generateQuestion() {
 
 function checkAnswer() {
     const userVal = parseInt(elInput.value);
-
-    if (isNaN(userVal)) {
-        elMessage.innerText = "Digite um número!";
-        elMessage.style.color = "yellow";
-        return;
-    }
+    if (isNaN(userVal)) return;
 
     if (userVal === currentQuestion.answer) {
-        // Acertou
-        elMessage.innerText = "Combustível abastecido! Nave avançando...";
+        elMessage.innerText = "Correto! Combustível subindo.";
         elMessage.style.color = "#00ff00";
         fuel = Math.min(fuel + 20, 100); 
         score += 10;
-        travel();
         generateQuestion();
     } else {
-        // Errou
-        elMessage.innerText = "Cálculo incorreto. Motores falhando!";
+        elMessage.innerText = "Ops! Tente novamente.";
         elMessage.style.color = "red";
-        fuel = Math.max(fuel - 10, 0); 
     }
     updateUI();
     saveGame();
 }
 
-function travel() {
-    // A cada acerto, viaja 10 anos-luz
-    distanceTraveled += 10;
+// --- LÓGICA DO MINIGAME ESPACIAL ---
+
+function startExploration() {
+    if (fuel < 100) return;
+
+    // Troca de telas
+    elMathScreen.classList.add('hidden');
+    elSpaceScreen.classList.remove('hidden');
+    elBtnExplore.classList.add('hidden'); // Esconde o botão até encher de novo
+
+    // Reset do Minigame
+    isPlayingGame = true;
+    gameTimer = 40;
+    fuel = 0; // Gasta o combustível para iniciar a viagem
+    gameObjects.forEach(obj => obj.element.remove());
+    gameObjects.length = 0; // Limpa array
     
-    // Verifica se chegou ao próximo planeta
-    let target = planets[currentPlanetIndex].distance;
-    if (distanceTraveled >= target) {
-        if (currentPlanetIndex < planets.length - 1) {
-            currentPlanetIndex++;
-            alert(`Parabéns! Você chegou em ${planets[currentPlanetIndex-1].name}! Próxima parada: ${planets[currentPlanetIndex].name}`);
-        } else {
-            alert("VOCÊ CONQUISTOU A GALÁXIA! Jogo zerado!");
-            distanceTraveled = 0;
-            currentPlanetIndex = 0;
-            score = 0;
+    // Inicia Loops
+    gameInterval = setInterval(updateTimer, 1000);
+    spawnInterval = setInterval(spawnObject, 800); // Cria algo a cada 0.8s
+    gameLoop();
+}
+
+function updateTimer() {
+    gameTimer--;
+    elTimer.innerText = gameTimer;
+    if (gameTimer <= 0) endExploration();
+}
+
+function endExploration() {
+    isPlayingGame = false;
+    clearInterval(gameInterval);
+    clearInterval(spawnInterval);
+    cancelAnimationFrame(animationFrameId);
+
+    alert(`Fim da Exploração! Você coletou muitos pontos. Volte a calcular para abastecer.`);
+
+    // Volta para o Math
+    elSpaceScreen.classList.add('hidden');
+    elMathScreen.classList.remove('hidden');
+    updateUI();
+    saveGame();
+}
+
+function spawnObject() {
+    if (!isPlayingGame) return;
+
+    const isStar = Math.random() > 0.7; // 30% chance de ser estrela
+    const obj = document.createElement('div');
+    obj.classList.add('game-object');
+    obj.innerText = isStar ? '⭐' : '🪨'; 
+    
+    // Posição aleatória horizontal (10% a 90%)
+    const posX = Math.random() * 80 + 10;
+    obj.style.left = posX + '%';
+    
+    elGameArea.appendChild(obj);
+
+    gameObjects.push({
+        element: obj,
+        x: posX,
+        y: -10, // Começa acima da tela
+        type: isStar ? 'star' : 'asteroid',
+        speed: isStar ? 0.5 : 0.8 // Asteroides são mais rápidos
+    });
+}
+
+function gameLoop() {
+    if (!isPlayingGame) return;
+
+    // Move objetos
+    for (let i = gameObjects.length - 1; i >= 0; i--) {
+        let obj = gameObjects[i];
+        obj.y += obj.speed;
+        obj.element.style.top = obj.y + '%';
+
+        // Detecta Colisão
+        if (checkCollision(obj)) {
+            if (obj.type === 'star') {
+                score += 50; // Pega estrela
+                flashScreen('gold');
+            } else {
+                score = Math.max(0, score - 20); // Bate na pedra
+                flashScreen('red');
+            }
+            // Remove objeto após colisão
+            obj.element.remove();
+            gameObjects.splice(i, 1);
+            updateUI(); // Atualiza pontuação em tempo real
+            continue;
+        }
+
+        // Remove se saiu da tela
+        if (obj.y > 100) {
+            obj.element.remove();
+            gameObjects.splice(i, 1);
         }
     }
+
+    animationFrameId = requestAnimationFrame(gameLoop);
 }
+
+// Detecção simples de colisão (aproximada pela % da tela)
+function checkCollision(obj) {
+    // Nave está fixa em Y (bottom 20px) ~ aprox 90% da altura
+    // Nave X é shipX (%). Objeto X é obj.x (%).
+    // Objeto Y é obj.y (%).
+    
+    const hitY = obj.y > 80 && obj.y < 95; // Zona de altura da nave
+    const hitX = Math.abs(obj.x - shipX) < 8; // Zona de largura da nave (aprox)
+
+    return hitY && hitX;
+}
+
+function flashScreen(color) {
+    elSpaceScreen.style.borderColor = color;
+    setTimeout(() => elSpaceScreen.style.borderColor = "#fff", 200);
+}
+
+// Movimento da Nave
+function moveShip(e) {
+    const rect = elGameArea.getBoundingClientRect();
+    const x = e.clientX - rect.left; // X dentro da div
+    shipX = (x / rect.width) * 100; // Converte para %
+    elPlayerShip.style.left = shipX + '%';
+}
+
+function moveShipTouch(e) {
+    e.preventDefault();
+    const rect = elGameArea.getBoundingClientRect();
+    const touch = e.touches[0];
+    const x = touch.clientX - rect.left;
+    shipX = (x / rect.width) * 100;
+    elPlayerShip.style.left = shipX + '%';
+}
+
+// --- UTILITÁRIOS ---
 
 function updateUI() {
-    elFuelBar.style.width = fuel + '%';    
-    if(fuel < 20) elFuelBar.style.background = "red";
-    else elFuelBar.style.background = "linear-gradient(90deg, #ff4b1f, #ff9068)";
-
+    elFuelBar.style.width = fuel + '%';
     elScore.innerText = score;
-    
-    let currentPlanet = planets[currentPlanetIndex];
-    elPlanetName.innerText = currentPlanet.name;
-    elPlanetIcon.innerText = currentPlanet.icon;
-    
-    let distLeft = currentPlanet.distance - distanceTraveled;
-    elKmLeft.innerText = Math.max(distLeft, 0);
-}
-elInput.addEventListener("keypress", function(event) {
-    if (event.key === "Enter") {
-        checkAnswer();
+
+    // Lógica do botão Explorar
+    if (fuel >= 100) {
+        elBtnExplore.classList.remove('hidden');
+        elInput.disabled = true; // Trava input
+        elMessage.innerText = "TANQUE CHEIO! Inicie a exploração.";
+    } else {
+        elBtnExplore.classList.add('hidden');
+        elInput.disabled = false;
     }
+}
+
+elInput.addEventListener("keypress", function(event) {
+    if (event.key === "Enter") checkAnswer();
 });
 
 function saveGame() {
-    const gameState = {
-        score: score,
-        fuel: fuel,
-        distance: distanceTraveled,
-        planetIdx: currentPlanetIndex
-    };
-    localStorage.setItem('mathGalaxySave', JSON.stringify(gameState));
+    localStorage.setItem('mathGalaxySaveV2', JSON.stringify({ score, fuel }));
 }
 
 function loadGame() {
-    const saved = localStorage.getItem('mathGalaxySave');
+    const saved = localStorage.getItem('mathGalaxySaveV2');
     if (saved) {
         const data = JSON.parse(saved);
-        score = data.score;
-        fuel = data.fuel;
-        distanceTraveled = data.distance;
-        currentPlanetIndex = data.planetIdx;
+        score = data.score || 0;
+        fuel = data.fuel || 0;
     }
 }
