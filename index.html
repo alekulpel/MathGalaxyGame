@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Math Galaxy Game</title>
+    <title>Math Galaxy Game 3.0</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -44,19 +44,25 @@
                 </div>
 
                 <button id="btn-explore" class="hidden" onclick="startExploration()">
-                    ✨ INICIAR EXPLORAÇÃO (Tanque Cheio!) ✨
+                    ✨ DECOLAR PARA O PRÓXIMO PLANETA ✨
                 </button>
+            </div>
+
+            <div class="planet-display">
+                <p>Base Atual:</p>
+                <div id="current-planet-icon" class="floating-planet">🌍</div>
+                <h2 id="current-planet-name">Terra</h2>
             </div>
         </main>
 
         <main id="space-screen" class="hidden">
             <div class="hud">
-                <span>Tempo Restante: <span id="timer">40</span>s</span>
+                <span>Tempo de Viagem: <span id="timer">40</span>s</span>
             </div>
             <div class="game-area" id="game-area">
                 <div id="player-ship">🚀</div>
-                </div>
-            <p class="instruction">Mova o mouse/dedo para guiar a nave!</p>
+            </div>
+            <p class="instruction">Desvie dos asteroides para chegar ao destino!</p>
         </main>
 
     </div>
