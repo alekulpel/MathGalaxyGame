@@ -2,10 +2,10 @@
 const planets = [
     { name: "Terra", icon: "🌍" },
     { name: "Lua", icon: "🌑" },
-    { name: "Marte", icon: "🪐" },
+    { name: "Marte", icon: "🔴" },
     { name: "Júpiter", icon: "🌕" },
     { name: "Saturno", icon: "🪐" },
-    { name: "Urano", icon: "❄️" },
+    { name: "Urano", icon: "🌚" },
     { name: "Netuno", icon: "🔵" },
     { name: "Plutão", icon: "⚪" },
     { name: "Galáxia X", icon: "🌌" }
